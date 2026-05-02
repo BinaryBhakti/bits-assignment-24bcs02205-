@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Library Manager Project Report</title>
+    <style>
+        body {
+            color: #172026;
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.55;
+            margin: 40px auto;
+            max-width: 900px;
+        }
+        h1, h2 {
+            color: #0e766e;
+        }
+        h1 {
+            border-bottom: 3px solid #0e766e;
+            padding-bottom: 12px;
+        }
+        code {
+            background: #eef3f1;
+            border-radius: 4px;
+            padding: 2px 5px;
+        }
+        pre {
+            background: #172026;
+            border-radius: 8px;
+            color: white;
+            overflow-x: auto;
+            padding: 14px;
+        }
+        .box {
+            border: 1px solid #d7dee2;
+            border-radius: 8px;
+            margin: 14px 0;
+            padding: 16px;
+        }
+        @media print {
+            body {
+                margin: 20mm;
+            }
+        }
+    </style>
+</head>
+<body>
+<h1>Library Manager Project Report</h1>
+
+<h2>Entity Relationship Design</h2>
+<p>The application manages two entities: <code>Author</code> and <code>Book</code>. One author can write many books, while every book belongs to exactly one author.</p>
+<div class="box">
+    <p><strong>Author:</strong> id, name, email, country, birthYear</p>
+    <p><strong>Book:</strong> id, title, genre, publishedYear, isbn, author</p>
+    <p><strong>Relationship:</strong> <code>Author @OneToMany Book</code> and <code>Book @ManyToOne Author</code></p>
+</div>
+<p>JPA creates the <code>authors</code> and <code>books</code> tables. The <code>books</code> table contains the foreign key <code>author_id</code>.</p>
+
+<h2>Populate Database</h2>
+<p>The <code>DataSeeder</code> class implements <code>CommandLineRunner</code>. At application startup, it inserts 10 authors and 10 books if the database is empty. Hibernate creates the schema automatically from JPA annotations using <code>spring.jpa.hibernate.ddl-auto=create</code>.</p>
+
+<h2>Create Operation</h2>
+<p>Create forms are implemented in JSP pages:</p>
+<ul>
+    <li><code>src/main/webapp/WEB-INF/jsp/authors/form.jsp</code></li>
+    <li><code>src/main/webapp/WEB-INF/jsp/books/form.jsp</code></li>
+</ul>
+<p>Controllers handle submissions through <code>POST /authors</code> and <code>POST /books</code>. Submitted objects are validated with Jakarta Bean Validation annotations. <code>DataIntegrityViolationException</code> is caught to show friendly duplicate-value errors for unique fields such as email, title, and ISBN.</p>
+
+<h2>Read Operation</h2>
+<p>List pages are implemented in JSP:</p>
+<ul>
+    <li><code>src/main/webapp/WEB-INF/jsp/authors/list.jsp</code></li>
+    <li><code>src/main/webapp/WEB-INF/jsp/books/list.jsp</code></li>
+</ul>
+<p>The book list calls the service layer, which uses the repository method <code>findBookAuthorDetails()</code>. That repository method performs an inner join between <code>Book</code> and <code>Author</code> and returns a DTO projection named <code>BookAuthorView</code>.</p>
+
+<h2>Update Operation</h2>
+<p>Edit links are available on the list pages. The update forms reuse the creation JSP files. Controllers load existing records with <code>GET /authors/{id}/edit</code> and <code>GET /books/{id}/edit</code>, then persist changes with <code>POST /authors/{id}</code> and <code>POST /books/{id}</code>.</p>
+
+<h2>Testing</h2>
+<p>Repository testing uses <code>@DataJpaTest</code> to verify the custom inner join query. Service testing uses JUnit 5 and Mockito to verify business logic and repository interaction.</p>
+<pre><code>mvn test</code></pre>
+
+<h2>Screenshots</h2>
+<p>Add screenshots after running the application from the following pages:</p>
+<ul>
+    <li>Books list: <code>http://localhost:8080/books</code></li>
+    <li>Add book: <code>http://localhost:8080/books/new</code></li>
+    <li>Authors list: <code>http://localhost:8080/authors</code></li>
+    <li>Add author: <code>http://localhost:8080/authors/new</code></li>
+</ul>
+
+<h2>Challenges Faced</h2>
+<p>The main challenge was cleanly binding a JSP form to a related entity. The book form submits the selected author through <code>author.id</code>; the service loads the managed <code>Author</code> before saving the <code>Book</code>. This keeps persistence behavior stable and avoids detached entity problems.</p>
+
+<h2>GitHub URL</h2>
+<p><code>https://github.com/your-username/library-manager</code></p>
+</body>
+</html>
